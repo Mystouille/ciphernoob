@@ -1,8 +1,5 @@
 #!/usr/bin/python3.5
-import enchant
-import unidecode
 import unicodedata
-dico = enchant.request_dict("fr_FR")
 
 charOffset = 97
 baseOffset = 8
@@ -20,18 +17,6 @@ keys = []
 #obvious ones
 oviousKeys = ["eodeth", "kinlan","mondek","demnok","lannik","kinlanmondek","demnoklannik","myrok"]
 
-keysDict=[]
-f = open("dictfr2.txt","r")
-fl = f.readlines()
-for line in fl:
-	if len(line)>3:
-		line2 = unicode(line, 'utf-8')
-		line3 =  unidecode.unidecode(line2)
-		keysDict.append(line3.replace('\n',''))
-
-f.close()
-
-keys=keysDict
 #extend or crop a key depending on the word we wanna decrypt
 def getResizedKey(baseKey,word):
 	key = baseKey
@@ -40,63 +25,32 @@ def getResizedKey(baseKey,word):
 	key = key[:len(word)]
 	return key
 
-#turn an array of int into a string
-def pretty(wordInt):
-	wordChar=""
-	for i in wordInt:
-		wordChar += chr(i+charOffset)
-	return wordChar
-
-#turn a string into an array of int
-def dirty(word):
-	wordInt = []
-	for i in word:
-		wordInt.append(ord(i)-charOffset)
-	return wordInt
-
-#decrypt the word via vigenere base on the key and the baseOffset (8)
-def vigenere(baseKey, word, nbIteration, decryptDirection):
-	key = getResizedKey(baseKey,word)
-	tempWord = word
-	for iteration in range(0,nbIteration):
-		out = []
-		for i in range(0, len(word)):
-			keyChar=key[i]
-			wordChar=tempWord[i]
-			outChar=0
-			#find the word encrypted by the cypher
-			if decryptDirection:
-				outChar=(wordChar - keyChar - baseOffset + 2*26)%26
-			#encrypt the word
-			else:
-				outChar=(wordChar + keyChar + baseOffset)%26
-			out.append(outChar)
-		tempWord = out
-	return tempWord
-
-log = {}
-totalKeys = len(keys)
-index = 0
-keys3=["neuf"]
-oldProgress = 0
-for key in keys3:
-	index+=1
-	progress = int(round(index*100/totalKeys))
-	if progress!=oldProgress:
-		print(str(progress)+"% : "+key)
-		oldProgress=progress
-	for word in words:
-		decrypted = pretty(vigenere(dirty(key),dirty(word),1,True))
-		#try to detect a french word of size 5 to 8 in the decrypted word
-		#if foud, log it to memory
-		log[decrypted] = key
-		#print(decrypted+"\tk:"+key)
-		found = True
 
 
-#dump search log into a file
-f = open("out.txt","w+")
-for key, value in log.items():
-	f.write(key+"\tk: "+value+"\n")
-f.close()
+def main():
+	log = {}
+	totalKeys = len(keys)
+	index = 0
+	keys3=["neuf"]
+	oldProgress = 0
+	for key in keys3:
+		index+=1
+		progress = int(round(index*100/totalKeys))
+		if progress!=oldProgress:
+			print(str(progress)+"% : "+key)
+			oldProgress=progress
+		for word in words:
+			decrypted = pretty(vigenere(dirty(key),dirty(word),1,True))
+			#try to detect a french word of size 5 to 8 in the decrypted word
+			#if foud, log it to memory
+			log[decrypted] = key
+			#print(decrypted+"\tk:"+key)
+			found = True
+
+
+	#dump search log into a file
+	f = open("out.txt","w+")
+	for key, value in log.items():
+		f.write(key+"\tk: "+value+"\n")
+	f.close()
 

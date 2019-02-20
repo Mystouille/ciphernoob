@@ -14,8 +14,8 @@ authorizedAsciiValues.extend(range(65,91))
 authorizedAsciiValues.extend(range(48,58))
 #punctuation? why not!
 authorizedAsciiValues.extend([33,46,58,59,63])
-authorizedAsciiValues
 
+print(authorizedAsciiValues)
 defaultThreshold = 0.5
 
 #different possible conversion methods
